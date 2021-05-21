@@ -1,0 +1,49 @@
+<launch>
+    <!--  -->
+    <!-- These parameters should NOT be touched by the user -->
+    <!-- XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX -->
+    <!-- will be overridden by the wrapper_namespace from the main_launcher.launch -->
+    <arg name="wrapper_namespace" default="wrapper"/> 
+
+    <!-- will be overridden by the global parameter for that from the parameters.yaml -->
+    <arg name="simulator_namespace" default=""/> 
+
+    <!-- will be overridden by the global parameter for that from the parameters.yaml -->
+    <arg name="base_map_file" default="$(find map_provider)/current_map/office_01/office_01.yaml"/>
+
+    <!-- will be overridden by the global parameter for that from the parameters.yaml -->
+    <arg name="active_wrapper" default="1"/>
+    
+    <!-- Launch evaluation framework/wrapper -->
+    <!-- XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX -->
+
+    <!-- Wrapper - Simulator launcher (will launch simulator) [with ns for the simulator (although it is a wrapper node) because all simulator nodes would have this ns, too] -->
+    <node if="$(eval simulator_namespace!='')" ns="$(arg simulator_namespace)" pkg="launchers" type="sim_launcher.py" name="sim_launcher" output="screen"/>
+    <node if="$(eval simulator_namespace=='')" pkg="launchers" type="sim_launcher.py" name="sim_launcher" output="screen"/>
+    
+    <group ns="$(arg wrapper_namespace)">
+        <!-- Wrapper - Control master -->
+        <node pkg="control_master" type="control_master.py" name="control_master" output="screen"/>
+
+        <!-- All the other nodes should only be launched if the wrapper should be completely active -->
+        <group if="$(arg active_wrapper)">
+            <!-- Wrapper - Map server -->
+            <node pkg="map_server" type="map_server" name="map_server" args="$(arg base_map_file)"/>
+            
+            <!-- Wrapper - Map provider -->
+            <node pkg="map_provider" type="map_provider.py" name="map_provider" output="screen"/>
+            
+            <!-- Wrapper - Dirt generator -->
+            <node pkg="global_dirt_generator" type="global_dirt_generator.py" name="global_dirt_generator" output="screen"/>
+        
+            <!-- Wrapper - World file generator (from map_server's map to gazebo world file) -->
+            <node pkg="map2gazebo" type="map2gazebo.py" name="world_generator" output="screen"/>
+
+            <!-- Wrapper - Data collector -->
+            <node pkg="data_collector" type="data_collector.py" name="data_collector" output="screen"/>
+
+            <!-- Wrapper - Evaluator -->
+            <node pkg="evaluator" type="evaluator.py" name="evaluator" output="screen"/>
+        </group>
+    </group>
+</launch>

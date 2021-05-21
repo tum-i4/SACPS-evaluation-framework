@@ -1,0 +1,627 @@
+# Global parameters which are especially used by the evaluation framework/wrapper, but exist also for the simulator
+
+# The default values in this file are for the case:
+config_name: "custom simulator with 100x100 map 1"
+
+
+
+# DESCRIPTION
+# XXXXXXXXXXXXXXXXXXXXXXXXX
+# On the top level is the parameter for the wrapper namespace.
+# You can simply get it with:
+# rospy.get_param("/wrapper_namespace")
+# [The '/' is important if you are not in the same namespace (the global one)!]
+
+# All other parameters have this namespace as prefix to avoid collosions with other parameters from the simulator.
+# You can get them with:
+# rospy.get_param("/" + rospy.get_param("/wrapper_namespace") + "/" + "<param_name>")
+# Example for the map_resolution below:
+# rospy.get_param("/" + rospy.get_param("/wrapper_namespace") + "/map_resolution")
+# [Pay attention to the '/' in the beginning and in between!]
+
+# Some more parameter commands (which you probably not need):
+# If you want to check if a parameter exist:
+# rospy.has_param("<param_name>")
+
+# If you want to search for a parameter:
+# rospy.search_param("<param_name>")
+
+# If you want to add a parameter:
+# rospy.set_param("<param_name>", <param_value>)
+
+# If you want to get all existing parameters:
+# rospy.get_param_names()
+
+# You should never delete a parameter!
+
+
+
+
+# PARAMETERS
+# XXXXXXXXXXXXXXXXXXXXXXXXX
+# Three categories:
+# 1. Should be changed or at least controlled by the user
+# 2. Can be changed by the user
+# 3. Should NOT be changed by the user, but could be interesting for him/her (especially topcis)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# 1. Should be changed or at least controlled by the user:
+# *****************************
+# Here, you need to specify the main launch file of your simulator: 
+# (if you do not have one, you should create a simple one and just launch with it your own launch node or your launch script)
+# Two ways exist - Only use one of them and leave the other one as "none" or empty string!
+# 1. If the launch file is inside a ROS package, specify first the name of this package:
+pkg_of_simulator_launch: "wrapper_interface"
+# and then the internal path from the package to the launch file:
+internal_path_to_simulator_launch: "launch/starter.launch"
+# 2. OR specify directly to complete/absolute path to the launch file:
+absolute_path_to_simulator_launch: ""
+# If additional launch/call arguments are needed, you can add them below in "sim_external_arguments"
+
+# If the simulator should be started with the whole wrapper or without.
+# If true: the wrapper will set up everything. It will especially generate, transform and provide the map and publish spawned dirt.
+# If false: the wrapper will only be active to start and terminate the simulator. It will not provide the map and publish dirt.
+# (the last option also means that none of the following parameters will be taken into account (except simulator path, time, launch arguments (also starting points) and roaming points)!)
+active_wrapper: true
+
+# Total time the simulation should run (in sec) [simulation time is equal to the time the robots can move - setup time is excluded]
+simulation_time: 240
+
+# Which parameters should be saved from this file, when the settings are stored and linked to the executed run (insert their names as strings):
+params_to_save: ["config_name", "simulation_time", "make_iteration_time_based", "minimum_iteration_time", "map_name", "map_resolution", "sim_no_of_robots", "robot_size", "robot_max_velocity", "sim_seed", "dirt_end_after_time", 
+  "dirt_end_after_number", "dirt_generation_time", "dirt_generated_number", "dirt_seed", "dirt_time_min", "dirt_time_max", "dirt_prevent_duplicates", "dirt_use_uniform_distr", "dirt_create_random_hotspots",
+  "dirt_number_of_random_hotspots", "dirt_hotspots", "dirt_strictly_hotspots", "use_map_section", "sim_starting_points"]
+# If you want to save a text with the result summary of the executed run (metadata):
+metadata_text: "This is a standard test case."
+
+# These options could be used by event-based simulators, if they want to allow the user to controll a bit their computation time per iteration.
+# This is especially helpful if the event-based simulator executes the iterations too fast (few miliseconds) and the data_collector cannot record and save the data fast enough
+# and/or if the event-based simulator should have as much (theoretical) time as an time-based one (and follow correctly the simulation-time)
+# PAY ATTENTION: it could stil be that the simulator developer did not integrate these parameters!
+# Is this parameter true (and implemented), the event-based simulator will try to controll the iteration time in a way that the robot movements make sense (time-based)
+# (example: if the robots can move 1m at maximum per iteration and their max velocity is 2m/s, each iteration should last 1/2=0.5s, 
+# because then a max distance movement of the robots makes sense regarding time. if they move less, we would assume, that they rest for the remaining iteration time) 
+make_iteration_time_based: true
+# Minimum time per iteration (will be checked/taken only if make_iteration_time_based is false): 
+minimum_iteration_time: 1.0 # in secs (set 0.0 if you do not want to limit the event-based simulator)
+
+# Which map should be used:
+# Currently, no map generation is implemented, which is why we have to specify which pre-build map should be used.
+# The files are in map_provider/current_map/... and then the folder with their map_name
+# A map needs a .pgm and a .yaml file.
+# We decided to insert always the same name (the map_name) like for the folder itself
+# Currently, we have these maps:
+# - office_01
+# - office_01_square (for simulator that can only handle squares like custom simulator)
+# - magistrale
+# - magistrale_square (for simulator that can only handle squares like custom simulator)
+# - library
+# - old_default
+# - fictional_10x10
+# - fictional_50x50
+# - fictional_100x100
+map_name: "fictional_100x100" # ATTENTION: it is not enough to only switch the name of the map! A new map probably also needs new starting points, exploration goals, etc. (see below)! 
+
+# Define how big each cell should finally be in the provided map:
+# (a cell is a pixel of the inital map image)
+map_resolution: 0.4 # m/cell (width and height of a cell)
+
+# Some robot parameters:
+robot_size: 0.21 #  Robot_size is the (biggest) diameter in m. default = 0.21 m
+robot_max_velocity: 0.22 # possible maximum of velocity the robot can move (in m/s)
+# These are arguments with which the simulator launch file will be called.
+# They need to be provided with an argument line in the launch file, otherwise the launch will fail!
+# Just add this to your launch file (if you do not have them yet):
+# <arg name="sim_gui" default="false"/> 
+# <arg name="sim_seed" default="100"/> 
+# <arg name="sim_no_of_robots" default="2"/> 
+# (if you have other names for it, just forward it: e.g. <arg name="your_arg_name" default="$(arg no_of_robots)"/>)
+# Attention: It does not mean that the simulator actually uses them. This depends completely on the simulator!
+sim_no_of_robots: 2 # number of robots (if the simulator is flexible and can handle such an argument)
+sim_gui: false # if an GUI should be started (if the simulator has one)
+sim_seed: 33 # randomness seed for a dirt generator (if the simulator is using controlled randomness)
+# (attention: if the wrapper will provid the dirt generator, then this seed will be ignored. You need to change the "dirt_seed" below!)
+
+# If you want to launch the simulator launch file (which you have specified above in the beginning) 
+# with some external arguments, you can write them in this string (otherwise leave it empty):
+# Example: if you want to change the arguments "test1" and "test2" in your launch file:
+# sim_external_arguments: "test1:=23 test2:=my_string"
+sim_external_arguments: ""
+
+# If you want to execute another command in a separate terminal when launching the simulator, you can add it here:
+# (good for e.g. launching an rviz terminal/window)
+sim_external_command: ""
+
+# Starting positions of the robot
+# Your launch file needs to provide these argument placeholders (like already explained above with sim_no_of_robots, etc.).
+# The arguments are always in this format: "sim_r<robot-number>_<x-or-y>_start", e.g. for two robots:
+# <arg name="sim_r0_x_start" default="X"/> 
+# <arg name="sim_r0_y_start" default="X"/> 
+# <arg name="sim_r1_x_start" default="X"/> 
+# <arg name="sim_r1_y_start" default="X"/> 
+# (Of course, your simulator can also request this structure internally (directly))
+# ATTENTION: You need to provide at least as many starting point entries here as many robots are specified via sim_no_of_robots!
+# If you provide more, it does not matter: Only the first entries will be taken until sim_no_of_robots is reached.
+sim_starting_points: [
+  {
+    x: 2.0,
+    y: 2.0
+  },
+  {
+    x: 19.0,
+    y: 3.0
+  }
+]
+
+# Roaming points (if the simulator needs some fixed points for exploration)
+# (First entry is for the first robot and so on. Each robot entry contains the robot prefix/name and another list, this time with the actual positions)
+# ATTENTION: You need to provide at least as many roaming point entries here as many robots are specified via sim_no_of_robots!
+# If you provide more, it does not matter: Only the first entries will be taken until sim_no_of_robots is reached.
+sim_roaming_points: [
+  {
+    prefix: "robot_0",
+    positions: [
+      {
+        x: 18.0,
+        y: 18.0
+      },
+      {
+        x: 2.0,
+        y: 4.0
+      }
+    ]
+  },
+  {
+    prefix: "robot_1",
+    positions: [
+      {
+        x: 5.0,
+        y: 19.0
+      },
+      {
+        x: 17.0,
+        y: 1.0
+      }
+    ]
+  }
+]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# 2. Can be changed by the user:
+# *****************************
+# The simulator namespace (prefix):
+# Should be empty or 'none' if your simulator does not take own namespaces into account (simulator is then without separate namespace)
+# (It is not recommended to change this)
+simulator_namespace: "" # default: none/empty string
+
+# How often the wrapper should print the remaining simulation time (in sec)
+time_update_interval: 10
+
+# If only a certain section of the initial image should be taken as map, the boundaries can be defined here.
+# The map layout can be found in the readme. The values should be real positions (in m).
+# However, this is NOT recommended to change (do not use "map_section")
+# (because normally the map creator will create an image which is completely filled by the map)
+use_map_section: false # default: false
+map_section_x_min: -5.0 # m (only active if use_map_section = true)
+map_section_x_max: 5.0 # m (only active if use_map_section = true)
+map_section_y_min: -5.0 # m (only active if use_map_section = true)
+map_section_y_max: 5.0 # m (only active if use_map_section = true)
+
+# If the initial map should be printed into the terminal (at the beginning):
+print_base_map: false
+
+# If the transformed map should be printed into the terminal (at the beginning):
+# (this is the map which should be used by the simulator and is provided via provided_map_topic)
+print_transformed_map: false
+# If the transformed map should be saved into the output folder (in maps folder etc.) (at the beginning):
+save_grid_map: true
+
+# If the simulation history should be documented by a mp4 video (a frame for every recorded timestamp with robot locations, current goals and all active dirt locations):
+save_sim_history: true
+# the frames per second of the simulation history video (should not be too high, because you probably want to see each timestamp)
+sim_history_fps: 10
+
+# Dirt generator:
+# Specify if the dirt generator should end after a specific time (see below): 
+dirt_end_after_time: false
+# Specify if the dirt generator should end after a specific number of spawned dirt (see below): 
+dirt_end_after_number: false
+# If dirt_end_after_time and dirt_end_after_number are both false, the generator will create dirt as long as the simulation runs!
+# Total time the dirt generation should run (in sec)
+# (starting with the start signal from the simulator)
+# (if the simulation_time is over, the generation will also end before that)
+dirt_generation_time: 50 # important if dirt_end_after_time = true
+# Total number of generated dirt
+dirt_generated_number: 100 # important if dirt_end_after_number = true
+# Randomness seed (input for the random generator - any 32bit integer)
+dirt_seed: 33
+# Min and max values for sleep time between generations/spawning (in sec)
+dirt_time_min: 10
+dirt_time_max: 10
+# Min and max trust level (amount of confidence that this is actual a dirt) (in %)
+dirt_trust_min: 100
+dirt_trust_max: 100
+# Specify if the generator should check if already a dirt is at this position before spawning a new dirt:
+dirt_prevent_duplicates: true # should be true if simulator will spawn actual dirt models
+# Dirt distribution parameters:
+dirt_enable_distr_printing: false # prints the general dirt distribution into terminal (an image will always be saved into the output folder!)
+dirt_enable_distr_plotting: false # plots the general dirt distribution in a separate window (an image will always be saved into the output folder!)
+# If you only want to use a uniform dirt distribution:
+dirt_use_uniform_distr: false  # if true, hotspots will be ignored (the next parameters)!
+# If you want to have a non-uniform distribution with some hotspots, but do not want to create them yourself:
+# (make sure dirt_use_uniform_distr is false if you want to have this true)
+dirt_create_random_hotspots: true # if true dirt_hotspots will be ignored
+# Number of random hotspots if dirt_create_random_hotspots is true:
+dirt_number_of_random_hotspots: 3
+# If you want to specify your own hotspots for a non-uniform distribution:
+# (make sure dirt_use_uniform_distr AND dirt_create_random_hotspots are false if you want to use this)
+# each row is a hotspot with [x, y, spread] (x and y as real position in m)
+dirt_hotspots: 
+  - {
+    x: 8.0,
+    y: 1.5,
+    spread: 0.8
+  }
+  - {
+    x: 5.0,
+    y: 8.5,
+    spread: 0.3
+  }
+  # - {
+  #   x: 8.0,
+  #   y: 8.0,
+  #   spread: 1.0
+  # }
+# Specify if dirt should only spawn at hotspots:
+# if true, then only the cells around hotspots have a chance for dirt. Cells far away will never have a dirt
+# if false, then all cells have the chance to have dirt (even if the far away cells have a nearly 0% chance)
+dirt_strictly_hotspots: true
+
+# If you want, you can specify some data, which should be recorded and added to the evaluation dataframe.
+# The simulator needs to provide this data via topics during run-time.
+# The mandatory data output can be found below with "mandatory_data_output". Keep in mind: the optional data will only be recorded, but not evaluated!
+# The following structure is a dictionary, which has an entry for each wanted data source. The key is how the data point is called
+# and the related container is again a dictionary which provides the topic name (on which the simulator should publish the data) and the data type.
+# The data type must be the name (as string) of a ROS message type. Currently supported: everything from std_msgs, nav_msgs and geometry_msgs.
+# [must be written like std_msgs.msg.String or geometry_msgs.msg.Point]
+optional_data_output: {
+  # # You can add your own recordings in here. An actual example can be seen below with the parameter "mandatory_data_output"
+  # # Do not forget the comma between entries!
+  dummy: { # this dummy is needed. The ros param server cannot handle empty dicts (please leave it as it is)
+    topic: "/recordings/empty",
+    type: "std_msgs.msg.String",
+    description: "Nothing"
+  }
+}
+# The list above is a dictionary, which is why it will not be transmitted in the order you have defined in here (will be sorted alphabetically).
+# If you want to have specific order of the keys/columns in the output table, you can define it in this list (the identical keys from above as strings):
+optional_data_output_order: []
+
+# Define, how the finals scores should be calculated.
+# The score is the product of all single business/mission goal results multiplied with the weighted sum of all single adaptation goals.
+# Each entry is for one goal score. So, each entry needs the type: mission_goal or adaptation_goal.
+# Each adaptation goal needs a weight (from ignore=0.0 to only focus=1.0). All weights need to sum up to 1.0.
+# Each goal/entry needs a function. The possible function can be looked up in evaluator/scripts/score_functions.py
+# and new functions can be added there. The index of the function in the list needs to be set here.
+# Depending on the function, input variables are needed. For each of those placeholder names in score_functions.py
+# an actual value needs to be defined. This can be directly the variable name from one of the recorded values in "mandatory_data_output"
+# or a global parameter (you have to write "parameter:" in front of it) or an actual static value (integer, float, etc.).
+# (description key is only there for the user)
+score_calculation: {
+  # Business goals = mission goals = functional goals (the oder in this dictionary does not play any role!):
+  no_crashes: {
+    type: "mission_goal",
+    function_index: 4,
+    variables: {
+      input_to_check: "robot_crashes",
+      threshold: 0
+    },
+    description: "No robot should crash at all."
+  },
+  minimum_cleaned: {
+    type: "mission_goal",
+    function_index: 5,
+    variables: {
+      input_to_check: "finished_dirt_number",
+      offset: 0,
+      aim: "spawned_dirt_number",
+      factor: 0.1, 
+      start_requirement: 5 # a certain number of dirt should be spawned to give the robots a chance to collect a minimum of them
+    },
+    description: "10% of spawned dirt must always be cleaned (at least) from the moment on when 5 dirt objects were spawned in total."
+  },
+  # Adaptation goals = quality goals = non-functional goals (the oder in this dictionary does not play any role!)
+  higher_cleaning_rate: {
+    type: "adaptation_goal",
+    weight: 0.5,
+    function_index: 0,
+    variables: {
+      portion_number: "finished_dirt_number", 
+      total_amount: "spawned_dirt_number"
+    },
+    description: "The more dirt is cleaned (from the total spawned dirt), the better it is."
+  },
+  shorter_dirt_existence: {
+    type: "adaptation_goal",
+    weight: 0.2,
+    function_index: 6,
+    variables: {
+      portion_number: "actual_dirt_existence_time", # the sum of existence time of all dirt until now
+      total_amount: "theoretical_dirt_existence_time" # the theoretical sum of existence time of all dirt until now IF NO DIRT WOULD HAVE BEEN CLEANED
+    },
+    description: "The shorter dirt exists (is not missed & not ignored), the better it is."
+  },
+  # higher_vision: { # = higher exploration
+  #   type: "adaptation_goal",
+  #   weight: 0.0,
+  #   function_index: ?,
+  #   variables: {
+  #     portion_number: "unified_visited_space_in_last_10_seconds", # 
+  #     total_amount: "total_free_space_of_the_map" # will be constant, but needs to be calculated for each map once in the beginning
+  #   },
+  #   description: "The more (new) vision the robots had in the last time, the better it is."
+  # },
+  higher_detection: {
+    type: "adaptation_goal",
+    weight: 0.2,
+    function_index: 0,
+    variables: {
+      portion_number: "detected_dirt_number",
+      total_amount: "spawned_dirt_number"
+    },
+    description: "The more dirt is detected, the better it is."
+  },
+  less_distance: {
+    type: "adaptation_goal",
+    weight: 0.1,
+    function_index: 3,
+    variables: {
+      traveled_distance: "traveled_distance_total", # m
+      elapsed_time: "theoretical_elapsed_time", # s
+      max_possible_velocity: "parameter:robot_max_velocity", # m/s
+      robot_count: "parameter:sim_no_of_robots"
+    },
+    description: "The less the robots move (the less they consume energy = money), the better it is."
+  }
+}
+# The list above is a dictionary, which is why it will not be transmitted in the order you have defined in here (will be sorted alphabetically).
+# If you want to have specific order of the keys/columns in the output table, you can define it in this list (the identical keys from above as strings):
+score_calculation_order: ["no_crashes", "minimum_cleaned", "less_distance", "higher_detection", "shorter_dirt_existence", "higher_cleaning_rate"]
+# Tip: a good order would be to have all mission goals first and after that the adaptation goals (the final score will always be last). 
+
+# should it be that the row indices are written in the final csv tables (for recordings and results):
+print_row_index: true
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# 3. Should NOT be changed by the user, but could be interesting for him/her:
+# *****************************
+# The wrapper_namespace is the only one which cannot be set here.
+# It is set in launchers/launch/main_launcher.launch (default = "wrapper").
+# It is not recommended to change it.
+
+# Topics the user likely need:
+# ATTENTION: all of them are published in the wrapper namespace.
+# This means if you want to subscribe to them, you need to add the namespace prefix in front.
+# Example: 
+# wrapper_ns = rospy.get_param("/wrapper_namespace")
+# topic = "/" + wrapper_ns + "/" + rospy.get_param("/" + wrapper_ns + "/base_map_topic")
+# Simulator needs to provide:
+sim_setup_end_topic: "sim_setup_finished" # the simulator signals with this that the robot can move now (simulation setup is finished)
+active_dirt_topic: "active_dirt" # the simulator publishs continously all current active dirt objects (undiscovered or unfinished)
+# Simulator should listen to:
+provided_map_topic: "provided_map" # provides the correct (updated/adjusted) map as OccupancyGrid (see readme)
+provided_map_path_topic: "provided_map_path" # provides the path to the inital map image as String()
+new_dirt_topic: "new_dirt" # provides new spawned dirt to the simulator (always at their spawning time)
+shutdown_sim_topic: "simulator_shutdown" # a msg will be published if the shutdown/termination of all simulator nodes is started. If no simulator node is blocked, this should also not be needed
+
+# For the evaluation, the framework needs some data from the simulator as basis for metrics and scores.
+# The simulator needs to provide this data via topics during run-time. 
+# The entries should NOT be changed!
+# The following structure is a dictionary, which has an entry for each needed data source. The key is how the data point is called
+# and the related container is again a dictionary which provides the topic name (on which the simulator should publish the data) and the data type.
+# The data type must be the name (as string) of a ROS message type. Currently supported: everything from std_msgs, nav_msgs and geometry_msgs.
+# [must be written like std_msgs.msg.String or geometry_msgs.msg.Point]
+# simulation_clock (when the recording was triggered based in the simulation time) is always in there!
+mandatory_data_output: {
+  theoretical_elapsed_time: {
+    topic: "/recordings/elapsed_time",
+    type: "std_msgs.msg.Float32",
+    description: "The time (in seconds) starting from the moment when the robots can move until now (if the simulation is not time-based, this should be the theoretical time based on the velocity and the movement distance of the robots (event-based example: if in each iteration the robot is moving 1m and has a standard velocity of 2m/s, it is clear that each iteration corresponds to more or less 0.5s, even if the computation time is totally different))"
+  }, 
+  traveled_distance_total: {
+    topic: "/recordings/traveled_distance_total",
+    type: "std_msgs.msg.Float32",
+    description: "The total distance/path all robots have travalled until now"
+  }, 
+  spawned_dirt_number: {
+    topic: "/recordings/spawned_dirt_number_total",
+    type: "std_msgs.msg.Int32",
+    description: "The total number of dirt piles spawned by the simulator until now (counted up)"
+  }, 
+  detected_dirt_number: {
+    topic: "/recordings/detected_dirt_number_total",
+    type: "std_msgs.msg.Int32",
+    description: "The total number of dirt piles detected (as actual goal) by the robots until now (counted up)"
+  }, 
+  finished_dirt_number: {
+    topic: "/recordings/finished_dirt_number_total",
+    type: "std_msgs.msg.Int32",
+    description: "The total number of dirt piles finished (cleaned) by the robots until now (counted up)"
+  }, 
+  robots_in_exploration: {
+    topic: "/recordings/robots_in_exploration_number",
+    type: "std_msgs.msg.Int32",
+    description: "How many robots are currently in exploration mode"
+  }, 
+  robot_crashes: {
+    topic: "/recordings/robot_crashes_total",
+    type: "std_msgs.msg.Int32",
+    description: "The total number of robot crashes/failures until now (counted up)"
+  }, 
+  execution_ratio_between_robots: {
+    topic: "/recordings/execution_ratio_between_robots",
+    type: "std_msgs.msg.String",
+    description: "How many tasks were finished by each robot until now (counted up). The string layout: An integer for each robot (in order: first integer is first robot, etc.), each integer is separated by minus sign. Example: '3-2' means robot 0 finished three and robot 1 two tasks."
+  }, 
+  actual_dirt_existence_time: {
+    topic: "/recordings/actual_dirt_existence_time",
+    type: "std_msgs.msg.Float32",
+    description: "The sum of existence time (in sec) of all dirt until now."
+  }, 
+  theoretical_dirt_existence_time: {
+    topic: "/recordings/theoretical_dirt_existence_time",
+    type: "std_msgs.msg.Float32",
+    description: "The theoretical sum of existence time (in sec) of all dirt until now IF NO DIRT WOULD HAVE BEEN CLEANED."
+  }, 
+  current_robot_locations: {
+    topic: "/recordings/current_robot_locations",
+    type: "std_msgs.msg.Float32MultiArray",
+    description: "The current robot locations (in meters): x of 1. robot, y of 1. robot, x of 2. robot, y of 2. robot, etc."
+  }, 
+  current_undetected_dirt_locations: {
+    topic: "/recordings/current_undetected_dirt_locations",
+    type: "std_msgs.msg.Float32MultiArray",
+    description: "The current undetected dirt locations (in meters): x of 1. dirt, y of 1. dirt, x of 2. dirt, y of 2. dirt, etc."
+  }, 
+  current_detected_dirt_locations: {
+    topic: "/recordings/current_detected_dirt_locations",
+    type: "std_msgs.msg.Float32MultiArray",
+    description: "The current detected dirt locations (in meters): x of 1. dirt, y of 1. dirt, x of 2. dirt, y of 2. dirt, etc."
+  },
+  current_goals_locations: {
+    topic: "/recordings/current_goals_locations",
+    type: "std_msgs.msg.Float32MultiArray",
+    description: "The current goal location of each robot (in meters): x of goal of 1. robot, y of goal of 1. robot, x of goal of 2. robot, y of goal of 2. robot, etc."
+  }
+}
+# The list above is a dictionary, which is why it will not be transmitted in the order you have defined in here (will be sorted alphabetically).
+# If you want to have specific order of the keys/columns in the output table, you can define it in this list (the identical keys from above as strings):
+mandatory_data_output_order: ["theoretical_elapsed_time", "robot_crashes", "robots_in_exploration", "spawned_dirt_number", "detected_dirt_number", "finished_dirt_number", "execution_ratio_between_robots", "traveled_distance_total",
+"current_robot_locations", "current_undetected_dirt_locations", "current_detected_dirt_locations", "current_goals_locations", "actual_dirt_existence_time", "theoretical_dirt_existence_time"]
+
+# For the data recordings above, the simulator needs to provide a trigger signal on the following topic.
+# Each time, the recorded values should be saved, an Empty signal needs to be published there (e.g. each second or each iteration).
+recording_trigger_topic: "save_latest_outputs" # needs again the wrapper namespace as prefix (see above)!
+
+# Topics the user should not need:
+# (check namespace info above)
+base_map_topic: "map" # is the initial OccupancyGrid of the map_server (not yet updated/adjusted!)
+final_shutdown_topic: "global_shutdown" # signals/requests the end of all evaluation nodes
+start_dirt_gen_topic: "start_dirt_generation" # signals/requests the start of dirt generation
+stop_dirt_gen_topic: "stop_dirt_generation" # signals/requests the end of dirt generation (might be already stopped)
+stop_data_collector_topic: "stop_data_collector"  # signals/requests the end of data_collector (might be already stopped)
+start_evaluation_topic:  "start_evaluation"  # signals/requests the start of the evaluator (the actual evaluation process)
+evaluation_finished_topic:  "evaluation_finished"  # signals/requests the end of the actual evaluation process
+sim_launcher_status_topic: "sim_launcher_status" # sim_launcher will publish its status (e.g. ready)
+map_provider_status_topic: "map_provider_status" # map_provider will publish its status (e.g. ready)
+global_dirt_generator_status_topic: "global_dirt_generator_status" # global_dirt_generator will publish its status (e.g. ready)
+world_generator_status_topic: "world_generator_status" # world_generator will publish its status (e.g. ready)
+data_collector_status_topic: "data_collector_status" # data_collector will publish its status (e.g. ready)
+evaluator_status_topic: "evaluator_status" # evaluator will publish its status (e.g. ready)
+final_shutdown_request_topic: "global_shutdown_request" # requests the end of all evaluation nodes from the control_master
+
+# Service the user should not need:
+  # (check namespace info above)
+request_sim_launch: "launch_sim"  # requests the simulator launch at sim_launch.py
+request_sim_termination: "terminate_sim"  # requests the simulator termination at sim_launch.py
+
+# For the image of the initial map:
+base_map_pkg: "map_provider"
+base_map_folder: "current_map" # the names of the map files (pgm and yaml) are depending on the map selected above (in the beginning)
+# the absolute path will be set in the beginning by the map_provider (do not change):
+base_map_absolute_path: "not set yet"
+
+# The transformed map will be set in the beginning (as a workaround if a simulator cannot listen in the beginning to the map topic):
+transformed_map: [] # array/list of occupancy integers
+transformed_map_width_cells: 0 # width in cells (will be set in the beginning)
+transformed_map_height_cells: 0 # height in cells (will be set in the beginning)
+
+# For the evaluation_master and pseudo_simulator launch files:
+launchers_pkg: "launchers"
+evaluation_master_path: "/launch/evaluation_master.launch" # needs to start with '/'
+main_launcher_path: "/launch/main_launcher.launch"  # needs to start with '/'
+config_path: "/config/parameters.yaml"  # needs to start with '/'
+
+# For the output:
+run_id: "" # string which indicates the specific run. Will be extended with date and time during run-time (so, it can be left empty if wanted)
+output_pkg: "evaluation_output" 
+distribution_folder: "dirt_distributions"  # inside output_pkg
+distribution_image: "dirt_distribution.png" # inside distribution_folder
+recorded_data_folder: "recorded_data" # inside output_pkg
+recorded_data_csv: "records.csv" # inside recorded_data_folder (this is only the base - will be combine with run_id during run-time)
+results_folder: "results" # inside output_pkg
+result_file: "result.csv" # inside results_folder (this is only the base - will be combine with run_id during run-time)
+config_save_folder: "config_info" # inside output_pkg
+config_save_file: "config.csv" # inside config_folder (this is only the base - will be combine with run_id during run-time)
+summary_folder: "result_summaries" # inside output_pkg
+summary_file: "summary.csv" # inside summary_folder (this is only the base - will be combine with run_id during run-time)
+output_map_folder: "transformed_maps" # inside output_pkg
+grid_file: "occupancy_grid.png" # inside map_folder (this is only the base - will be combine with run_id during run-time)
+evolution_folder: "score_evolution" # inside output_pkg
+evolution_file: "score_evolution.png" # inside evolution_folder (this is only the base - will be combine with run_id during run-time)
+simulation_history_folder: "simulation_history" # inside output_pkg
+simulation_history_file: "simulation_history.mp4" # inside simulation_history_folder (this is only the base - will be combine with run_id during run-time)
+
+# Dirt generator:
+# Number of points in each initial distribution
+dirt_points_per_distr: 1000  # --> generated distribution points for the final distribution grid map: #hotspots * dirt_points_per_distr
+
+# World generator (from occupancy grid to mesh for gazebo world file):
+# map2gazebo takes occupancy grid from base_map_topic
+world_gen_mesh_type: "stl"  # Can be "stl" or "dae" (current system needs stl)
+world_gen_occupied_thresh: 1  # Minimum threshold value for considering a map cell occupied
+world_gen_box_height: 1.0  # Height of boxes in gazebo environment
+world_gen_export_dir: "/models/map/meshes" # needs to start with '/' (inside gazebo_world_pkg)
+gazebo_world_pkg: "map2gazebo" # pkg name
+gazebo_world_path: "/worlds/generic_with_mesh.world" # needs to start with '/' (inside gazebo_world_pkg)
+# (old one without generic mesh (for the old default map): "/worlds/small_environment.world")
+
+simulation_clock_topic: "simulation_clock" # control_master publishs on this topic every second the current simulation time
+time_name: "simulation_clock" # column name of the time in the output recordings 

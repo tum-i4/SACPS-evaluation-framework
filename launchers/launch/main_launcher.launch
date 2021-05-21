@@ -1,0 +1,23 @@
+<launch>
+    <!--  -->
+    <!-- the namespace/prefix for the wrapper: -->
+    <!-- It is not recommened to change it (although there is no hardcoded version of it) -->
+    <arg name="wrapper_namespace" default="wrapper"/>  <!-- default="wrapper" -->
+    <param name="/wrapper_namespace" value="$(arg wrapper_namespace)"/>
+
+    <!-- Add the models folder of map2gazebo to the other ones on the gazebo path -->
+    <!-- Reason: the wrapper is generating custom meshs for the maps which are included into the world file and this can only be loaded by gazebo if it knows the folder path to it -->
+    <env name="GAZEBO_MODEL_PATH" value="$(find map2gazebo)/models:$(optenv GAZEBO_MODEL_PATH)" />
+
+    <!-- Set up parameter server -->
+    <!-- XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX -->
+    <group ns="$(arg wrapper_namespace)">
+        <rosparam file="$(find launchers)/config/parameters.yaml"/>
+    </group>
+    
+    <!-- Launch main launcher -->
+    <!-- XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX -->
+    <!-- Wrapper - Simulator launcher (will launch simulator) [without ns because otherwise all simulator nodes would have this ns, too] -->
+    <node pkg="launchers" type="main_launcher.py" name="main_launcher" output="screen"/>
+    
+</launch>
