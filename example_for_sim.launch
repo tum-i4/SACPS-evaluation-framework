@@ -1,0 +1,20 @@
+<launch>
+    <!-- arguments which will be overridden by the wrapper (if it is active), but needs to exist: -->
+    <!-- default values can be set as you want -->
+    <arg name="sim_gui" default="true"/> <!-- if the simulator has a GUI, then turn it on/off based on this -->
+    <arg name="sim_seed" default="100"/> <!-- seed for random generator (if it is needed) -->
+    <arg name="sim_no_of_robots" default="2"/> <!-- number of simulated robots -->
+    <arg name="sim_r0_x_start" default="0.0"/> <!-- starting position of robot 0 -->
+    <arg name="sim_r0_y_start" default="0.0"/> <!-- starting position of robot 0 -->
+    <arg name="sim_r1_x_start" default="1.0"/> <!-- starting position of robot 1 -->
+    <arg name="sim_r1_y_start" default="1.0"/> <!-- starting position of robot 1 -->
+    <arg name="sim_base_map_file" default="$for/example/path/to/reference_map.yaml"/> <!-- image of the inital map (if the simulator needs it) >>> if the wrapper is active, this will switch to map_provider pkg etc. -->
+    <arg name="sim_gazebo_world_file" default="$for/example/path/to/small_environment.world"/> <!-- gazebo world (if the simulator needs it) >>> if the wrapper is active, this will switch to map_provider pkg etc. -->
+
+    <!-- everything your simulator needs ... -->
+    <!-- TODO -->
+
+    <!-- and then launch it (nodes, other launch files, scripts, ...) ... -->
+    <!-- TODO -->
+
+</launch>

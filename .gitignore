@@ -1,0 +1,90 @@
+# Output folders
+evaluation_output/dirt_distributions/*.png
+!evaluation_output/dirt_distributions/.gitkeep
+!evaluation_output/dirt_distributions/save_files/*.png
+
+evaluation_output/recorded_data/*.csv
+!evaluation_output/recorded_data/.gitkeep
+!evaluation_output/recorded_data/save_files/*.csv
+
+evaluation_output/results/*.csv
+!evaluation_output/results/.gitkeep
+!evaluation_output/results/save_files/*.csv
+
+evaluation_output/config_info/*.csv
+!evaluation_output/config_info/.gitkeep
+!evaluation_output/config_info/save_files/*.csv
+
+evaluation_output/result_summaries/*.csv
+!evaluation_output/result_summaries/.gitkeep
+!evaluation_output/result_summaries/save_files/*.csv
+
+evaluation_output/transformed_maps/*.png
+!evaluation_output/transformed_maps/.gitkeep
+!evaluation_output/transformed_maps/save_files/*.png
+
+evaluation_output/score_evolution/*.png
+!evaluation_output/score_evolution/.gitkeep
+!evaluation_output/score_evolution/save_files/*.png
+
+evaluation_output/simulation_history/*.gif
+evaluation_output/simulation_history/*.mp4
+!evaluation_output/simulation_history/.gitkeep
+!evaluation_output/simulation_history/save_files/*.gif
+!evaluation_output/simulation_history/save_files/*.mp4
+
+map2gazebo/models/map/meshes/map.stl
+
+# OSX metadata
+**/.DS_Store
+
+# PyCharm files
+.idea/
+
+# Ignore Gradle project-specific cache directory
+.gradle
+
+# Ignore Gradle build output directory
+build
+
+# Ignore Eclipse metadata and project files
+.metadata
+.settings
+.classpath
+.project
+
+# Ignore Gradle/Eclipse log files
+.log
+
+target
+build
+dist
+MANIFEST
+.idea
+*.iml
+*.jar
+*.war
+*.ear
+__pycache__/
+hs_err_pid*
+winbuild.log
+local.dat
+setup.out
+*.pyc
+jpy.egg-info
+lib/
+.vagrant
+Vagrantfile
+*.so
+*.dll
+
+# ROS build
+build
+devel
+src/CMakeLists.txt
+
+# VSC
+.vscode
+*.vscode
+.vscode/
+*.vscode/
