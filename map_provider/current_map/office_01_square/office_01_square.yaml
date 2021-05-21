@@ -1,0 +1,7 @@
+image: office_01_square.pgm
+resolution: 0.050000
+origin: [0.000000, 0.000000, 0.000000]
+negate: 0
+occupied_thresh: 0.50
+free_thresh: 0.196
+
